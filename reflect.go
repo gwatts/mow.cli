@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"reflect"
@@ -60,16 +61,14 @@ func vset(into reflect.Value, s string) error {
 	return nil
 }
 
-func vinit(into reflect.Value, envVars string, defaultValue interface{}) {
+func vinit(into flag.Value, envVars string) {
 	if len(envVars) > 0 {
 		for _, rev := range strings.Split(envVars, " ") {
 			ev := strings.TrimSpace(rev)
 			if len(ev) > 0 {
 				v := os.Getenv(ev)
 				if len(v) > 0 {
-					conv, err := vconv(v, into.Elem().Type())
-					if err == nil {
-						into.Elem().Set(conv)
+					if err := into.Set(v); err == nil {
 						return
 					}
 				}
@@ -77,5 +76,4 @@ func vinit(into reflect.Value, envVars string, defaultValue interface{}) {
 		}
 
 	}
-	into.Elem().Set(reflect.ValueOf(defaultValue))
 }

@@ -1,10 +1,10 @@
 package cli
 
 import (
-	"fmt"
-	"reflect"
-	"strings"
 	"flag"
+	"fmt"
+	"strconv"
+	"strings"
 )
 
 // BoolOpt describes a boolean option
@@ -22,6 +22,25 @@ type BoolOpt struct {
 	Value bool
 	// A boolean to display or not the current value of the option in the help message
 	HideValue bool
+
+	into *bool
+}
+
+var (
+	_ flag.Value = &BoolOpt{}
+)
+
+func (bo *BoolOpt) Set(s string) error {
+	b, err := strconv.ParseBool(s)
+	if err != nil {
+		return err
+	}
+	*bo.into = b
+	return nil
+}
+
+func (bo *BoolOpt) String() string {
+	return fmt.Sprintf("%v", *bo.into)
 }
 
 // StringOpt describes a string option
@@ -39,6 +58,21 @@ type StringOpt struct {
 	Value string
 	// A boolean to display or not the current value of the option in the help message
 	HideValue bool
+
+	into *string
+}
+
+var (
+	_ flag.Value = &StringOpt{}
+)
+
+func (so *StringOpt) Set(s string) error {
+	*so.into = s
+	return nil
+}
+
+func (so *StringOpt) String() string {
+	return fmt.Sprintf("%#v", *so.into)
 }
 
 // IntOpt describes an int option
@@ -56,6 +90,25 @@ type IntOpt struct {
 	Value int
 	// A boolean to display or not the current value of the option in the help message
 	HideValue bool
+
+	into *int
+}
+
+var (
+	_ flag.Value = &IntOpt{}
+)
+
+func (io *IntOpt) Set(s string) error {
+	i, err := strconv.ParseInt(s, 10, 64)
+	if err != nil {
+		return err
+	}
+	*io.into = int(i)
+	return nil
+}
+
+func (io *IntOpt) String() string {
+	return fmt.Sprintf("%v", *io.into)
 }
 
 // StringsOpt describes a string slice option
@@ -93,7 +146,6 @@ type IntsOpt struct {
 	// A boolean to display or not the current value of the option in the help message
 	HideValue bool
 }
-
 
 // BoolOpt describes a boolean option
 type VarOpt struct {
@@ -181,29 +233,29 @@ func (c *Cmd) VarOpt(name string, value flag.Value, desc string) {
 	c.mkOpt(opt{name: name, desc: desc}, value)
 }
 
+type boolOpt interface {
+	flag.Value
+	IsBoolFlag() bool
+}
+
 type opt struct {
-	name          string
-	desc          string
-	envVar        string
-	names         []string
-	helpFormatter func(interface{}) string
-	value         reflect.Value
-	hideValue     bool
+	name      string
+	desc      string
+	envVar    string
+	names     []string
+	hideValue bool
+	value     flag.Value
 }
 
 func (o *opt) isBool() bool {
-	return o.value.Elem().Kind() == reflect.Bool
+	if bf, ok := o.value.(boolOpt); ok {
+		return bf.IsBoolFlag()
+	}
+	return false
 }
 
 func (o *opt) String() string {
 	return fmt.Sprintf("Opt(%v)", o.names)
-}
-
-func (o *opt) get() interface{} {
-	return o.value.Elem().Interface()
-}
-func (o *opt) set(s string) error {
-	return vset(o.value, s)
 }
 
 func mkOptStrs(optName string) []string {
@@ -218,21 +270,13 @@ func mkOptStrs(optName string) []string {
 	return namesSl
 }
 
-func (c *Cmd) mkOpt(opt opt, defaultValue interface{}) interface{} {
-	value := reflect.ValueOf(defaultValue)
-	res := reflect.New(value.Type())
-
-	opt.helpFormatter = formatterFor(value.Type())
-
-	vinit(res, opt.envVar, defaultValue)
+func (c *Cmd) mkOpt(opt opt, defaultValue interface{}) {
+	vinit(opt.value, opt.envVar)
 
 	opt.names = mkOptStrs(opt.name)
-	opt.value = res
 
 	c.options = append(c.options, &opt)
 	for _, name := range opt.names {
 		c.optionsIdx[name] = &opt
 	}
-
-	return res.Interface()
 }

@@ -113,7 +113,9 @@ The result should be stored in a variable (a pointer to a bool) which will be po
 func (c *Cmd) Bool(p BoolParam) *bool {
 	switch x := p.(type) {
 	case BoolOpt:
-		return c.mkOpt(opt{name: x.Name, desc: x.Desc, envVar: x.EnvVar, hideValue: x.HideValue}, x.Value).(*bool)
+		*x.into = x.Value
+		c.mkOpt(opt{name: x.Name, desc: x.Desc, envVar: x.EnvVar, hideValue: x.HideValue, value: &x}, x.Value)
+		return x.into
 	case BoolArg:
 		return c.mkArg(arg{name: x.Name, desc: x.Desc, envVar: x.EnvVar, hideValue: x.HideValue}, x.Value).(*bool)
 	default:
@@ -322,7 +324,7 @@ func (c *Cmd) formatOptValue(opt *opt) string {
 	if opt.hideValue {
 		return " "
 	}
-	return "=" + opt.helpFormatter(opt.get())
+	return "=" + opt.value.String()
 }
 
 func (c *Cmd) formatDescription(desc, envVar string) string {
