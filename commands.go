@@ -68,6 +68,11 @@ IntsParam represents an int slice option or argument
 type IntsParam interface{}
 
 /*
+IntsParam represents an int slice option or argument
+*/
+type VarParam interface{}
+
+/*
 CmdInitializer is a function that configures a command by adding options, arguments, a spec, sub commands and the code
 to execute when the command is called
 */

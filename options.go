@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+	"flag"
 )
 
 // BoolOpt describes a boolean option
@@ -93,6 +94,24 @@ type IntsOpt struct {
 	HideValue bool
 }
 
+
+// BoolOpt describes a boolean option
+type VarOpt struct {
+	VarParam
+
+	// A space separated list of the option names *WITHOUT* the dashes, e.g. `f force` and *NOT* `-f --force`.
+	// The one letter names will then be called with a single dash (short option), the others with two (long options).
+	Name string
+	// The option description as will be shown in help messages
+	Desc string
+	// A space separated list of environment variables names to be used to initialize this option
+	EnvVar string
+
+	Value flag.Value
+	// A boolean to display or not the current value of the option in the help message
+	HideValue bool
+}
+
 /*
 BoolOpt defines a boolean option on the command c named `name`, with an initial value of `value` and a description of `desc` which will be used in help messages.
 
@@ -156,6 +175,10 @@ The result should be stored in a variable (a pointer to an int slice) which will
 */
 func (c *Cmd) IntsOpt(name string, value []int, desc string) *[]int {
 	return c.mkOpt(opt{name: name, desc: desc}, value).(*[]int)
+}
+
+func (c *Cmd) VarOpt(name string, value flag.Value, desc string) {
+	c.mkOpt(opt{name: name, desc: desc}, value)
 }
 
 type opt struct {
