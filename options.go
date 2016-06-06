@@ -127,6 +127,28 @@ type StringsOpt struct {
 	Value []string
 	// A boolean to display or not the current value of the option in the help message
 	HideValue bool
+
+	into *[]string
+}
+
+var (
+	_ flag.Value = &StringsOpt{}
+)
+
+func (so *StringsOpt) Set(s string) error {
+	*so.into = append(*so.into, s)
+	return nil
+}
+
+func (so *StringsOpt) String() string {
+	res := "["
+	for idx, s := range *so.into {
+		if idx > 0 {
+			res += ", "
+		}
+		res += fmt.Sprintf("%#v", s)
+	}
+	return res + "]"
 }
 
 // IntsOpt describes an int slice option
@@ -145,6 +167,32 @@ type IntsOpt struct {
 	Value []int
 	// A boolean to display or not the current value of the option in the help message
 	HideValue bool
+
+	into *[]int
+}
+
+var (
+	_ flag.Value = &IntsOpt{}
+)
+
+func (io *IntsOpt) Set(s string) error {
+	i, err := strconv.ParseInt(s, 10, 64)
+	if err != nil {
+		return err
+	}
+	*io.into = append(*io.into, int(i))
+	return nil
+}
+
+func (io *IntsOpt) String() string {
+	res := "["
+	for idx, s := range *io.into {
+		if idx > 0 {
+			res += ", "
+		}
+		res += fmt.Sprintf("%v", s)
+	}
+	return res + "]"
 }
 
 // BoolOpt describes a boolean option
@@ -174,7 +222,11 @@ The one letter names will then be called with a single dash (short option), the 
 The result should be stored in a variable (a pointer to a bool) which will be populated when the app is run and the call arguments get parsed
 */
 func (c *Cmd) BoolOpt(name string, value bool, desc string) *bool {
-	return c.mkOpt(opt{name: name, desc: desc}, value).(*bool)
+	return c.Bool(BoolOpt{
+		Name:  name,
+		Value: value,
+		Desc:  desc,
+	})
 }
 
 /*
@@ -187,7 +239,11 @@ The one letter names will then be called with a single dash (short option), the 
 The result should be stored in a variable (a pointer to a string) which will be populated when the app is run and the call arguments get parsed
 */
 func (c *Cmd) StringOpt(name string, value string, desc string) *string {
-	return c.mkOpt(opt{name: name, desc: desc}, value).(*string)
+	return c.String(StringOpt{
+		Name:  name,
+		Value: value,
+		Desc:  desc,
+	})
 }
 
 /*
@@ -200,7 +256,11 @@ The one letter names will then be called with a single dash (short option), the 
 The result should be stored in a variable (a pointer to an int) which will be populated when the app is run and the call arguments get parsed
 */
 func (c *Cmd) IntOpt(name string, value int, desc string) *int {
-	return c.mkOpt(opt{name: name, desc: desc}, value).(*int)
+	return c.Int(IntOpt{
+		Name:  name,
+		Value: value,
+		Desc:  desc,
+	})
 }
 
 /*
@@ -213,7 +273,11 @@ The one letter names will then be called with a single dash (short option), the 
 The result should be stored in a variable (a pointer to a string slice) which will be populated when the app is run and the call arguments get parsed
 */
 func (c *Cmd) StringsOpt(name string, value []string, desc string) *[]string {
-	return c.mkOpt(opt{name: name, desc: desc}, value).(*[]string)
+	return c.Strings(StringsOpt{
+		Name:  name,
+		Value: value,
+		Desc:  desc,
+	})
 }
 
 /*
@@ -226,12 +290,16 @@ The one letter names will then be called with a single dash (short option), the 
 The result should be stored in a variable (a pointer to an int slice) which will be populated when the app is run and the call arguments get parsed
 */
 func (c *Cmd) IntsOpt(name string, value []int, desc string) *[]int {
-	return c.mkOpt(opt{name: name, desc: desc}, value).(*[]int)
+	return c.Ints(IntsOpt{
+		Name:  name,
+		Value: value,
+		Desc:  desc,
+	})
 }
 
-func (c *Cmd) VarOpt(name string, value flag.Value, desc string) {
-	c.mkOpt(opt{name: name, desc: desc}, value)
-}
+//func (c *Cmd) VarOpt(name string, value flag.Value, desc string) {
+//	c.mkOpt(opt{name: name, desc: desc}, value)
+//}
 
 type boolOpt interface {
 	flag.Value
@@ -270,7 +338,7 @@ func mkOptStrs(optName string) []string {
 	return namesSl
 }
 
-func (c *Cmd) mkOpt(opt opt, defaultValue interface{}) {
+func (c *Cmd) mkOpt(opt opt) {
 	vinit(opt.value, opt.envVar)
 
 	opt.names = mkOptStrs(opt.name)

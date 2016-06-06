@@ -159,7 +159,7 @@ func (c *Cmd) mkArg(arg arg, defaultvalue interface{}) interface{} {
 
 	arg.helpFormatter = formatterFor(value.Type())
 
-	vinit(res, arg.envVar, defaultvalue)
+	vinit(res, arg.envVar)
 
 	arg.value = res
 

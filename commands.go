@@ -113,8 +113,9 @@ The result should be stored in a variable (a pointer to a bool) which will be po
 func (c *Cmd) Bool(p BoolParam) *bool {
 	switch x := p.(type) {
 	case BoolOpt:
-		*x.into = x.Value
-		c.mkOpt(opt{name: x.Name, desc: x.Desc, envVar: x.EnvVar, hideValue: x.HideValue, value: &x}, x.Value)
+		v := x.Value
+		x.into = &v
+		c.mkOpt(opt{name: x.Name, desc: x.Desc, envVar: x.EnvVar, hideValue: x.HideValue, value: &x})
 		return x.into
 	case BoolArg:
 		return c.mkArg(arg{name: x.Name, desc: x.Desc, envVar: x.EnvVar, hideValue: x.HideValue}, x.Value).(*bool)
@@ -132,7 +133,10 @@ The result should be stored in a variable (a pointer to a string) which will be 
 func (c *Cmd) String(p StringParam) *string {
 	switch x := p.(type) {
 	case StringOpt:
-		return c.mkOpt(opt{name: x.Name, desc: x.Desc, envVar: x.EnvVar, hideValue: x.HideValue}, x.Value).(*string)
+		v := x.Value
+		x.into = &v
+		c.mkOpt(opt{name: x.Name, desc: x.Desc, envVar: x.EnvVar, hideValue: x.HideValue, value: &x})
+		return x.into
 	case StringArg:
 		return c.mkArg(arg{name: x.Name, desc: x.Desc, envVar: x.EnvVar, hideValue: x.HideValue}, x.Value).(*string)
 	default:
@@ -149,7 +153,10 @@ The result should be stored in a variable (a pointer to an int) which will be po
 func (c *Cmd) Int(p IntParam) *int {
 	switch x := p.(type) {
 	case IntOpt:
-		return c.mkOpt(opt{name: x.Name, desc: x.Desc, envVar: x.EnvVar, hideValue: x.HideValue}, x.Value).(*int)
+		v := x.Value
+		x.into = &v
+		c.mkOpt(opt{name: x.Name, desc: x.Desc, envVar: x.EnvVar, hideValue: x.HideValue, value: &x})
+		return x.into
 	case IntArg:
 		return c.mkArg(arg{name: x.Name, desc: x.Desc, envVar: x.EnvVar, hideValue: x.HideValue}, x.Value).(*int)
 	default:
@@ -166,7 +173,10 @@ The result should be stored in a variable (a pointer to a string slice) which wi
 func (c *Cmd) Strings(p StringsParam) *[]string {
 	switch x := p.(type) {
 	case StringsOpt:
-		return c.mkOpt(opt{name: x.Name, desc: x.Desc, envVar: x.EnvVar, hideValue: x.HideValue}, x.Value).(*[]string)
+		v := x.Value
+		x.into = &v
+		c.mkOpt(opt{name: x.Name, desc: x.Desc, envVar: x.EnvVar, hideValue: x.HideValue, value: &x})
+		return x.into
 	case StringsArg:
 		return c.mkArg(arg{name: x.Name, desc: x.Desc, envVar: x.EnvVar, hideValue: x.HideValue}, x.Value).(*[]string)
 	default:
@@ -183,7 +193,10 @@ The result should be stored in a variable (a pointer to an int slice) which will
 func (c *Cmd) Ints(p IntsParam) *[]int {
 	switch x := p.(type) {
 	case IntsOpt:
-		return c.mkOpt(opt{name: x.Name, desc: x.Desc, envVar: x.EnvVar, hideValue: x.HideValue}, x.Value).(*[]int)
+		v := x.Value
+		x.into = &v
+		c.mkOpt(opt{name: x.Name, desc: x.Desc, envVar: x.EnvVar, hideValue: x.HideValue, value: &x})
+		return x.into
 	case IntsArg:
 		return c.mkArg(arg{name: x.Name, desc: x.Desc, envVar: x.EnvVar, hideValue: x.HideValue}, x.Value).(*[]int)
 	default:
