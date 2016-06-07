@@ -39,6 +39,10 @@ func (bo *BoolOpt) Set(s string) error {
 	return nil
 }
 
+func (bo *BoolOpt) IsBoolFlag() bool {
+	return true
+}
+
 func (bo *BoolOpt) String() string {
 	return fmt.Sprintf("%v", *bo.into)
 }
@@ -195,7 +199,7 @@ func (io *IntsOpt) String() string {
 	return res + "]"
 }
 
-// BoolOpt describes a boolean option
+// VarOpt describes a user-settable option
 type VarOpt struct {
 	VarParam
 
@@ -297,9 +301,9 @@ func (c *Cmd) IntsOpt(name string, value []int, desc string) *[]int {
 	})
 }
 
-//func (c *Cmd) VarOpt(name string, value flag.Value, desc string) {
-//	c.mkOpt(opt{name: name, desc: desc}, value)
-//}
+func (c *Cmd) VarOpt(name string, value flag.Value, desc string) {
+	c.mkOpt(opt{name: name, desc: desc, value: value})
+}
 
 type boolOpt interface {
 	flag.Value

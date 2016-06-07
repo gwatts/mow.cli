@@ -179,7 +179,7 @@ func (s *state) parse(args []string) error {
 
 	for arg, vs := range pc.args {
 		for _, v := range vs {
-			if err := arg.set(v); err != nil {
+			if err := arg.value.Set(v); err != nil {
 				return err
 			}
 		}

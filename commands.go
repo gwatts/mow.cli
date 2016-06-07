@@ -118,7 +118,10 @@ func (c *Cmd) Bool(p BoolParam) *bool {
 		c.mkOpt(opt{name: x.Name, desc: x.Desc, envVar: x.EnvVar, hideValue: x.HideValue, value: &x})
 		return x.into
 	case BoolArg:
-		return c.mkArg(arg{name: x.Name, desc: x.Desc, envVar: x.EnvVar, hideValue: x.HideValue}, x.Value).(*bool)
+		v := x.Value
+		x.into = &v
+		c.mkArg(arg{name: x.Name, desc: x.Desc, envVar: x.EnvVar, hideValue: x.HideValue, value: &x})
+		return x.into
 	default:
 		panic(fmt.Sprintf("Unhandled param %v", p))
 	}
@@ -138,7 +141,10 @@ func (c *Cmd) String(p StringParam) *string {
 		c.mkOpt(opt{name: x.Name, desc: x.Desc, envVar: x.EnvVar, hideValue: x.HideValue, value: &x})
 		return x.into
 	case StringArg:
-		return c.mkArg(arg{name: x.Name, desc: x.Desc, envVar: x.EnvVar, hideValue: x.HideValue}, x.Value).(*string)
+		v := x.Value
+		x.into = &v
+		c.mkArg(arg{name: x.Name, desc: x.Desc, envVar: x.EnvVar, hideValue: x.HideValue, value: &x})
+		return x.into
 	default:
 		panic(fmt.Sprintf("Unhandled param %v", p))
 	}
@@ -158,7 +164,10 @@ func (c *Cmd) Int(p IntParam) *int {
 		c.mkOpt(opt{name: x.Name, desc: x.Desc, envVar: x.EnvVar, hideValue: x.HideValue, value: &x})
 		return x.into
 	case IntArg:
-		return c.mkArg(arg{name: x.Name, desc: x.Desc, envVar: x.EnvVar, hideValue: x.HideValue}, x.Value).(*int)
+		v := x.Value
+		x.into = &v
+		c.mkArg(arg{name: x.Name, desc: x.Desc, envVar: x.EnvVar, hideValue: x.HideValue, value: &x})
+		return x.into
 	default:
 		panic(fmt.Sprintf("Unhandled param %v", p))
 	}
@@ -178,7 +187,10 @@ func (c *Cmd) Strings(p StringsParam) *[]string {
 		c.mkOpt(opt{name: x.Name, desc: x.Desc, envVar: x.EnvVar, hideValue: x.HideValue, value: &x})
 		return x.into
 	case StringsArg:
-		return c.mkArg(arg{name: x.Name, desc: x.Desc, envVar: x.EnvVar, hideValue: x.HideValue}, x.Value).(*[]string)
+		v := x.Value
+		x.into = &v
+		c.mkArg(arg{name: x.Name, desc: x.Desc, envVar: x.EnvVar, hideValue: x.HideValue, value: &x})
+		return x.into
 	default:
 		panic(fmt.Sprintf("Unhandled param %v", p))
 	}
@@ -198,7 +210,10 @@ func (c *Cmd) Ints(p IntsParam) *[]int {
 		c.mkOpt(opt{name: x.Name, desc: x.Desc, envVar: x.EnvVar, hideValue: x.HideValue, value: &x})
 		return x.into
 	case IntsArg:
-		return c.mkArg(arg{name: x.Name, desc: x.Desc, envVar: x.EnvVar, hideValue: x.HideValue}, x.Value).(*[]int)
+		v := x.Value
+		x.into = &v
+		c.mkArg(arg{name: x.Name, desc: x.Desc, envVar: x.EnvVar, hideValue: x.HideValue, value: &x})
+		return x.into
 	default:
 		panic(fmt.Sprintf("Unhandled param %v", p))
 	}
@@ -330,7 +345,7 @@ func (c *Cmd) formatArgValue(arg *arg) string {
 	if arg.hideValue {
 		return " "
 	}
-	return "=" + arg.helpFormatter(arg.get())
+	return "=" + arg.value.String()
 }
 
 func (c *Cmd) formatOptValue(opt *opt) string {
